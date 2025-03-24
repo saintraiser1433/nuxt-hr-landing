@@ -4,6 +4,8 @@
 
 <template>
   <div>
+    <Header/>
     <slot></slot>
   </div>
+  <Footer/>
 </template>

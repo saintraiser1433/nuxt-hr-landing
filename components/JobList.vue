@@ -12,7 +12,8 @@
     </div>
     <div
         class="container mx-auto w-full items-center justify-center px-8">
-        <TracingBeam class="px-8 lg:px-0">
+        <TracingBeam
+            class="px-8 lg:px-0">
             <BentoGrid
                 class="mx-auto">
 
@@ -36,8 +37,8 @@
                         <strong>{{ item.title }}</strong>
                     </template>
                     <template #description>
-                        <RainbowButton>Apply now!</RainbowButton>
-
+                        <RainbowButton
+                            @click="applyNow">Apply now!</RainbowButton>
                     </template>
                 </BentoGridItem>
             </BentoGrid>
@@ -45,8 +46,12 @@
     </div>
 </template>
 
-<script lang="ts" setup>
-
+<script setup lang="ts">
+const applyNow =  () => {
+     navigateTo({
+        name: 'application'
+    })
+}
 </script>
 
 <style>
