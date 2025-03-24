@@ -94,8 +94,7 @@
 
 </template>
 
-<script lang="ts">
-const isDark = computed(() => useColorMode().value == "dark");
+<script setup lang="ts">
 </script>
 
 <style>
