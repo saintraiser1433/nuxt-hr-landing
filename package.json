@@ -16,16 +16,21 @@
     "@nuxtjs/color-mode": "^3.5.2",
     "@nuxtjs/svg-sprite": "^1.0.2",
     "@vueuse/core": "^13.0.0",
+    "date-fns": "^4.1.0",
+    "dotenv": "^16.4.7",
+    "joi": "^17.13.3",
     "lucide-vue-next": "^0.483.0",
     "motion-v": "^0.13.1",
     "nuxt": "^3.16.1",
     "theme-colors": "^0.1.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
-    "vue-use-spring": "^0.3.3"
+    "vue-use-spring": "^0.3.3",
+    "vue3-toastify": "^0.2.8"
   },
   "devDependencies": {
     "@inspira-ui/plugins": "^0.0.1",
+    "@types/node": "^22.13.12",
     "autoprefixer": "^10.4.21",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

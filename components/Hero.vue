@@ -24,7 +24,7 @@
                                         <span class="font-semibold text-[#1f864c]">dynamic</span> work environment.
 
                                     </p>
-                                    <InteractiveHoverButton class="my-5" text="Let's Begin"></InteractiveHoverButton>
+                                    <InteractiveHoverButton class="my-5" text="Let's Begin" @click="letsBegin"></InteractiveHoverButton>
                                 </div>
                             </BoxReveal>
                         </div>
@@ -36,7 +36,9 @@
 </template>
 
 <script lang="ts" setup>
-
+    const letsBegin = () => {
+        navigateTo('#jobs')
+    }
 </script>
 
 <style>

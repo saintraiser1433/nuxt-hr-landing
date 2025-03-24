@@ -15,37 +15,27 @@
         <input
           ref="fileInputRef"
           type="file"
+          accept="application/pdf"
           class="hidden"
           @change="onFileChange"
         />
 
-        <!-- Grid pattern -->
-        <div
-          class="pointer-events-none absolute inset-0 [mask-image:radial-gradient(ellipse_at_center,white,transparent)]"
-        >
-          <slot />
-        </div>
-
         <!-- Content -->
         <div class="flex flex-col items-center justify-center">
-          <p
-            class="relative z-20 font-sans text-base font-bold text-neutral-700 dark:text-neutral-300"
-          >
-            Upload your resume (only accept pdf file)
+          <p class="relative z-20 font-sans text-base font-bold text-neutral-700 dark:text-neutral-300">
+            Upload your resume (only accept PDF file)
           </p>
-          <p
-            class="relative z-20 mt-2 font-sans text-base font-normal text-neutral-400 dark:text-neutral-400"
-          >
-            Drag or drop your files here or click to upload
+          <p class="relative z-20 mt-2 font-sans text-base font-normal text-neutral-400 dark:text-neutral-400">
+            Drag or drop your file here or click to upload
           </p>
 
-          <div class="relative mx-auto mt-10 w-full max-w-xl space-y-4">
+          <div class="relative mx-auto mt-10 w-full max-w-xl">
             <Motion
-              v-for="(file, idx) in files"
-              :key="`file-${idx}`"
+              v-if="file"
+              :key="file.name"
               :initial="{ opacity: 0, scaleX: 0 }"
               :animate="{ opacity: 1, scaleX: 1 }"
-              class="relative z-40 mx-auto flex w-full flex-col items-start justify-start overflow-hidden rounded-md bg-white p-4 shadow-sm md:h-24 dark:bg-neutral-900"
+              class="relative z-40 mx-auto flex w-full flex-col items-start justify-start overflow-hidden rounded-md bg-white p-4 shadow-sm dark:bg-neutral-900"
             >
               <div class="flex w-full items-center justify-between gap-4">
                 <Motion
@@ -64,11 +54,17 @@
                 >
                   {{ (file.size / (1024 * 1024)).toFixed(2) }} MB
                 </Motion>
+                <!-- 🗑️ Remove Button -->
+  
+                <button
+                @click="removeFile"
+                class="absolute bottom-3 right-4  bg-red-500 text-white px-3 py-1 text-xs rounded-md hover:bg-red-600 transition"
+              >
+                Remove
+              </button>
               </div>
 
-              <div
-                class="mt-2 flex w-full flex-col items-start justify-between text-sm text-neutral-600 md:flex-row md:items-center dark:text-neutral-400"
-              >
+              <div class="mt-2 flex w-full flex-col md:flex-row md:items-center text-sm text-neutral-600 dark:text-neutral-400">
                 <Motion
                   as="p"
                   :initial="{ opacity: 0 }"
@@ -77,45 +73,21 @@
                 >
                   {{ file.type || "unknown type" }}
                 </Motion>
-                <Motion
-                  as="p"
-                  :initial="{ opacity: 0 }"
-                  :animate="{ opacity: 1 }"
-                >
+                <Motion as="p" :initial="{ opacity: 0 }" :animate="{ opacity: 1 }">
                   modified {{ new Date(file.lastModified).toLocaleDateString() }}
                 </Motion>
               </div>
             </Motion>
 
-            <template v-if="!files.length">
+            <template v-if="!file">
               <Motion
                 as="div"
                 class="relative z-40 mx-auto mt-4 flex h-32 w-full max-w-32 items-center justify-center rounded-md bg-white shadow-[0px_10px_50px_rgba(0,0,0,0.1)] group-hover/file:shadow-2xl dark:bg-neutral-900"
-                :initial="{
-                  x: 0,
-                  y: 0,
-                  opacity: 1,
-                }"
-                :transition="{
-                  type: 'spring',
-                  stiffness: 300,
-                  damping: 20,
-                }"
-                :animate="
-                  isActive
-                    ? {
-                        x: 20,
-                        y: -20,
-                        opacity: 0.9,
-                      }
-                    : {}
-                "
+                :initial="{ x: 0, y: 0, opacity: 1 }"
+                :transition="{ type: 'spring', stiffness: 300, damping: 20 }"
+                :animate="isActive ? { x: 20, y: -20, opacity: 0.9 } : {}"
               >
-                <Icon
-                  name="heroicons:arrow-up-tray-20-solid"
-                  class="text-neutral-600 dark:text-neutral-400"
-                  size="20"
-                />
+                <Icon name="heroicons:arrow-up-tray-20-solid" class="text-neutral-600 dark:text-neutral-400" size="20" />
               </Motion>
 
               <div
@@ -143,22 +115,33 @@ interface FileUploadProps {
 defineProps<FileUploadProps>();
 
 const emit = defineEmits<{
-  (e: "onChange", files: File[]): void;
+  (e: "onChange", file: File | null): void;
 }>();
 
 const fileInputRef = ref<HTMLInputElement | null>(null);
-const files = ref<File[]>([]);
+const file = ref<File | null>(null);
 const isActive = ref<boolean>(false);
 
-function handleFileChange(newFiles: File[]) {
-  files.value = [...files.value, ...newFiles];
-  emit("onChange", files.value);
+// 🛠️ Restrict to PDFs & Handle File Change
+function handleFileChange(newFile: File) {
+  if (newFile.type !== "application/pdf") {
+    alert("Only PDF files are allowed!");
+    return;
+  }
+  file.value = newFile; // ✅ Only 1 file allowed (replace previous)
+  emit("onChange", file.value);
+}
+
+// 🗑️ Remove File Function
+function removeFile() {
+  file.value = null;
+  emit("onChange", null);
 }
 
 function onFileChange(e: Event) {
   const input = e.target as HTMLInputElement;
-  if (!input.files) return;
-  handleFileChange(Array.from(input.files));
+  if (!input.files || input.files.length === 0) return;
+  handleFileChange(input.files[0]); // ✅ Limit to 1 file
 }
 
 function handleClick() {
@@ -173,17 +156,7 @@ function handleLeave() {
 }
 function handleDrop(e: DragEvent) {
   isActive.value = false;
-  const droppedFiles = e.dataTransfer?.files ? Array.from(e.dataTransfer.files) : [];
-  if (droppedFiles.length) handleFileChange(droppedFiles);
+  if (!e.dataTransfer?.files || e.dataTransfer.files.length === 0) return;
+  handleFileChange(e.dataTransfer.files[0]); // ✅ Limit to 1 file
 }
 </script>
-
-<style scoped>
-.group-hover\/file\:shadow-2xl:hover {
-  box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.25);
-}
-
-.transition-opacity {
-  transition: opacity 0.3s ease;
-}
-</style>

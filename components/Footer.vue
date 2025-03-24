@@ -5,7 +5,7 @@
             class="container mx-auto flex justify-center items-center">
             <div
                 class="flex flex-col justify-center items-center">
-                <Dock class="mb-2">
+                <!-- <Dock class="mb-2">
                 <DockIcon>
                   <svg-icon
                             name="icon/facebook"
@@ -26,9 +26,9 @@
                             width="32"
                             height="32"></svg-icon>
                 </DockIcon>
-            </Dock>
+            </Dock> -->
 
-                <!-- <div
+                <div
                     class="flex py-4 gap-5 ">
                     <a href="www.facebook.com" target="_blank">
                         <svg-icon
@@ -53,9 +53,10 @@
                             width="32"
                             height="32"></svg-icon>
                     </a>
-                </div> -->
+                </div>
 
                 <p
+  
                     class="text-xs text-center">Copyright © 2020-2025. South East Asian Institute of Technology Inc.
                     All
                     Rights

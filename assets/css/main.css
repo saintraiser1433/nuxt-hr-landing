@@ -77,9 +77,12 @@
 }
 
 @layer base {
+  html{
+    @apply scroll-smooth;
+  }
   * {
     font-family: var(--font-poppins);
-    @apply border-border;
+    @apply border-border ;
   }
 
   body {
