@@ -48,5 +48,20 @@ interface RequirementCommandPallete {
     title?: string;
 }
 
+export interface SubmitApplicant {
+    jobId:string;
+    first_name:string;
+    last_name:string;
+    middle_name:string;
+    email:string;
+    contact_number:string;
+    resume_path:File
+    photo_path:File
+}
 
+export interface ApiResponse<T> {
+    status: number;
+    message: string;
+    data?: T;
+  }
 

@@ -1,7 +1,7 @@
 <template>
   <ClientOnly>
     <div
-      :class="cn('w-full', $props.class)"
+      :class="cn('w-full', $props.class as string)"
       @dragover.prevent="handleEnter"
       @dragleave="handleLeave"
       @drop.prevent="handleDrop"
@@ -15,7 +15,7 @@
         <input
           ref="fileInputRef"
           type="file"
-          accept="application/pdf"
+          :accept="fileType === 'pdf' ? 'application/pdf' : 'image/*'"
           class="hidden"
           @change="onFileChange"
         />
@@ -23,7 +23,7 @@
         <!-- Content -->
         <div class="flex flex-col items-center justify-center">
           <p class="relative z-20 font-sans text-base font-bold text-neutral-700 dark:text-neutral-300">
-            Upload your resume (only accept PDF file)
+            Upload your {{ fileType === "pdf" ? "Resume" : "4x4 Photo" }} ({{ fileType === "pdf" ? "Only PDF" : "Only Images" }} allowed)
           </p>
           <p class="relative z-20 mt-2 font-sans text-base font-normal text-neutral-400 dark:text-neutral-400">
             Drag or drop your file here or click to upload
@@ -54,14 +54,13 @@
                 >
                   {{ (file.size / (1024 * 1024)).toFixed(2) }} MB
                 </Motion>
-                <!-- 🗑️ Remove Button -->
-  
+
                 <button
-                @click="removeFile"
-                class="absolute bottom-3 right-4  bg-red-500 text-white px-3 py-1 text-xs rounded-md hover:bg-red-600 transition"
-              >
-                Remove
-              </button>
+                  @click="removeFile"
+                  class="absolute bottom-3 right-4 bg-red-500 text-white px-3 py-1 text-xs rounded-md hover:bg-red-600 transition"
+                >
+                  Remove
+                </button>
               </div>
 
               <div class="mt-2 flex w-full flex-col md:flex-row md:items-center text-sm text-neutral-600 dark:text-neutral-400">
@@ -108,11 +107,14 @@ import { cn } from "@/lib/utils";
 import { Motion } from "motion-v";
 import { ref } from "vue";
 
-interface FileUploadProps {
-  class?: HTMLAttributes["class"];
-}
-
-defineProps<FileUploadProps>();
+// Props
+const props = defineProps({
+  fileType: {
+    type: String,
+    default: "image", // Default to image files
+    validator: (value: string) => ["image", "pdf"].includes(value),
+  },
+});
 
 const emit = defineEmits<{
   (e: "onChange", file: File | null): void;
@@ -122,13 +124,21 @@ const fileInputRef = ref<HTMLInputElement | null>(null);
 const file = ref<File | null>(null);
 const isActive = ref<boolean>(false);
 
-// 🛠️ Restrict to PDFs & Handle File Change
+// 🛠️ Handle File Change with Validation
 function handleFileChange(newFile: File) {
-  if (newFile.type !== "application/pdf") {
+  const isPdf = newFile.type === "application/pdf";
+  const isImage = newFile.type.startsWith("image/");
+
+  if (props.fileType === "pdf" && !isPdf) {
     alert("Only PDF files are allowed!");
     return;
   }
-  file.value = newFile; // ✅ Only 1 file allowed (replace previous)
+  if (props.fileType === "image" && !isImage) {
+    alert("Only Image files are allowed!");
+    return;
+  }
+
+  file.value = newFile;
   emit("onChange", file.value);
 }
 
@@ -141,7 +151,7 @@ function removeFile() {
 function onFileChange(e: Event) {
   const input = e.target as HTMLInputElement;
   if (!input.files || input.files.length === 0) return;
-  handleFileChange(input.files[0]); // ✅ Limit to 1 file
+  handleFileChange(input.files[0]);
 }
 
 function handleClick() {

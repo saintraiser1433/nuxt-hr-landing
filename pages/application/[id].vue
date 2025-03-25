@@ -3,6 +3,7 @@ const {
     $api,
     $toast
 } = useNuxtApp();
+const { handleApiError } = useErrorHandler();
 const config = useRuntimeConfig()
 const route = useRoute();
 const jobList = computed(() => data.value || {});
@@ -15,6 +16,16 @@ const {
 } = await useAPI<JobModel>(`/job/${route.params.id}`);
 if (error.value) {
     $toast.error(error.value.message || "Failed to fetch items");
+}
+const applicantRepo = repository<SubmitApplicant>($api, "/applicant");
+const submit = async(response:SubmitApplicant) => {
+    try{
+        console.log(response)
+        const res = await applicantRepo.addWithDocuments({...response,jobId:route.params.id});
+        $toast.success(res.message);
+    }catch(err){
+        handleApiError(err);
+    }
 }
 
 
@@ -54,7 +65,7 @@ if (error.value) {
                       
                     </div>
                     <hr />
-                    <ApplicationForm></ApplicationForm>
+                    <ApplicationForm @data-submit="submit"></ApplicationForm>
 
                 </div>
             </div>

@@ -5,6 +5,7 @@ const {
     $joi,
 } = useNuxtApp();
 
+const emits = defineEmits(['dataSubmit'])
 
 const formData = ref({
     first_name: '',
@@ -14,7 +15,7 @@ const formData = ref({
     contact_number: ''
 });
 const resumeFile = ref<File | null>(null);
-
+const photoFile = ref<File | null>(null);
 const schema = $joi.object({
     first_name: $joi.string().required().messages({
         "string.empty": "First Name is Required",
@@ -33,34 +34,54 @@ const schema = $joi.object({
         "string.empty": "Email is required",
         "any.required": "Email is required",
     }),
-    contact_number: $joi.number().required().messages({
-        "number.empty": "Contact Number is Required",
-        "any.required": "Contact Number is Required",
+    contact_number: $joi.string()
+                    .pattern(/^09\d{9}$/) // Ensures it starts with "09" and has 11 digits in total
+                    .required()
+                    .messages({
+                        "string.pattern.base": "Invalid contact number. Must start with '09' and be exactly 11 digits.",
+                        "string.empty": "Contact Number is Required",
+                        "any.required": "Contact Number is Required",
     }),
 
 });
+
+const validateMaxLength = (event: Event) => {
+    const input = event.target as HTMLInputElement;
+    input.value = input.value.replace(/\D/g, "").slice(0, 11); // Allow only digits, max 11
+    formData.value.contact_number = input.value;
+};
 
 const file = (file:File | null) => {
   resumeFile.value = file;
 }
 
+const photo = (file:File | null) => {
+   photoFile.value = file;
+}
+
 const errors = ref <Record<string,string>>({});
 
 const validateForm = () => {
-    const {
-        error
-    } = schema.validate(formData.value, {
-        abortEarly: false
-    });
+    const { error } = schema.validate(formData.value, { abortEarly: false });
+
+    errors.value = {};
 
     if (error) {
-        errors.value = {};
         error.details.forEach((err: any) => {
             errors.value[err.path[0]] = err.message;
         });
-    } else {
-        errors.value = {}; 
+    }
 
+    if (!resumeFile.value) {
+        errors.value["resume_path"] = "Resume file is required";
+    }
+
+    if (!resumeFile.value) {
+        errors.value["photo_path"] = "4x4 Photo is required";
+    }
+
+    if (Object.keys(errors.value).length === 0) {
+        emits("dataSubmit", { ...formData.value, resume_path:resumeFile.value,photo_path:photoFile.value });
     }
 };
 </script>
@@ -100,18 +121,33 @@ const validateForm = () => {
       <IInput
           v-model="formData.contact_number"
           id="contact"
-          type="number"
-          container-class="w-full"></IInput>
+          type="text"
+          container-class="w-full"
+          maxlength="11"
+          @input="validateMaxLength"
+          ></IInput>
           <p v-if="errors.contact_number" class="text-red-500">{{ errors.contact_number }}</p>
+     <div
+          class="space-y-6 p-8 dark:bg-black border">
+          <FileUpload
+              @on-change="photo"
+              class="rounded-lg border border-dashed border-neutral-200 dark:border-neutral-800">
+              <FileUploadGrid />
+
+          </FileUpload>
+          <p v-if="errors.photo_path" class="text-red-500">{{ errors.photo_path }}</p>
+      </div>
 
       <div
-          class="space-y-6 p-8 dark:bg-black">
+          class="space-y-6 p-8 dark:bg-black border">
           <FileUpload
+              file-type="pdf"
               @on-change="file"
               class="rounded-lg border border-dashed border-neutral-200 dark:border-neutral-800">
               <FileUploadGrid />
 
           </FileUpload>
+          <p v-if="errors.resume_path" class="text-red-500">{{ errors.resume_path }}</p>
       </div>
 
       <ShimmerButton
