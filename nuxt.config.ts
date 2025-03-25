@@ -3,7 +3,7 @@ import 'dotenv/config';
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
-  ssr:false,
+  ssr: false,
   modules: [
     '@nuxt/icon',
     '@nuxt/image',
@@ -22,7 +22,7 @@ export default defineNuxtConfig({
   imports: {
     dirs: ["constants/*.ts", "types/*.ts", "store/*.ts", "utils/*.ts", "composables/*.ts", "composables/*/*.ts"],
   },
-  css: ['~/assets/css/main.css'],
+  css: ['~/assets/css/main.css', 'sweetalert2/dist/sweetalert2.min.css', 'vue3-toastify/dist/index.css'],
   postcss: {
     plugins: {
       tailwindcss: {},
@@ -43,6 +43,6 @@ export default defineNuxtConfig({
       STORAGE_URL_RESUME: process.env.STORAGE_URL_RESUME
     },
   },
-  
-  
+
+
 })
