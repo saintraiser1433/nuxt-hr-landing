@@ -18,7 +18,7 @@
 <script setup lang="ts">
 const { $api, $toast } = useNuxtApp();
 const jobList = computed(
-  () => data.value.filter((item) => item.totalAvailable > 0) || []
+  () => data.value?.filter((item) => item.totalAvailable || 0 > 0) || []
 );
 
 const { data, status, error } = await useAPI<JobModel[]>("/job", {
